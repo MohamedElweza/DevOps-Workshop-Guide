@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: your-dockerhub-username/nginx
+    container_name: lbcont
+    ports:
+      - "80:80"
+    depends_on:
+      - contapp
+
+  contapp:
+    image: your-dockerhub-username/tomcat
+    container_name: contapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - appdata:/usr/local/tomcat/webapps
+    networks:
+      - backend
+
+  db01:
+    image: your-dockerhub-username/mysql
+    container_name: db01
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD:  ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
+  mc01:
+    image: memcached
+    container_name: mc01
+    ports:
+      - "11211:11211"
+    networks:
+      - backend
+
+  rmq01:
+    image: rabbitmq
+    container_name: rmq01
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER= ${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS= ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+  appdata:
+
+networks:
+  backend:
